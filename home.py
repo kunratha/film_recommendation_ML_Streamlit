@@ -1,21 +1,100 @@
 import streamlit as st
 import pickle
 import requests
-
-
-# import pages.other_page as other_page
+import random
 
 st.set_page_config(
     page_title="projet2-movie-system-reco",
-    page_icon="👋",
+    page_icon="🎬",
     layout="wide",
-    initial_sidebar_state="expanded",
+    # initial_sidebar_state="collapsed",
+)
+
+st.markdown(
+    """
+    <style>
+    /* Gradient for the Streamlit navbar with three colors and background opacity */
+    header[data-testid="stHeader"] {
+        background: linear-gradient(45deg, rgba(28, 28, 40, 0), rgba(75, 0, 130, 0) 40%, rgba(255, 165, 0, 0.5) 80%);
+        backdrop-filter: blur(10px);  /* Optional: Adds a blur effect */
+        color: white;
+    }
+
+    /* Ensure the navbar text remains fully visible and unaffected by opacity */
+    header[data-testid="stHeader"] * {
+        color: white;
+        opacity: 1;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
 )
 
 
-# .........................................................................................................
-# RECOMMENDATION SYSTEM
-# .........................................................................................................
+# # Inject custom CSS for navbar
+# st.markdown(
+#     """
+#     <style>
+#     /* Target the Streamlit navbar */
+#     header[data-testid="stHeader"] {
+#         background-color: transparent;
+#         background-image: linear-gradient(45deg, rgba(255, 90, 205, 0.8), rgba(251, 218, 97, 0.8));
+#         height: 70px;
+#     }
+
+#     /* Customize the text color inside the navbar */
+#     header[data-testid="stHeader"] * {
+#         color: white;
+#     }
+
+#     /* Remove the background shadow from the navbar */
+#     header[data-testid="stHeader"]::before {
+#         content: "";
+#         display: block;
+#         background-color: rgba(0, 0, 0, 0); /* Adjust opacity if needed */
+#         height: 100%;
+#     }
+#     </style>
+#     """,
+#     unsafe_allow_html=True,
+# )
+
+
+# Function to inject background CSS
+def inject_background_css():
+    background_css = """
+        <style>
+        /* Main container background with opacity overlay */
+        [data-testid="stAppViewContainer"] {
+            background-image: url("https://i.imgur.com/fmbehef.jpeg");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: scroll;
+            position: fixed;
+            z-index: 1;
+        }
+
+        /* Add a semi-transparent overlay on top of the background image */
+        [data-testid="stAppViewContainer"]::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7); /* Adjust the opacity with this rgba value */
+            z-index: 0;
+        }
+        </style>
+    """
+
+    # Apply the CSS styles
+    st.markdown(background_css, unsafe_allow_html=True)
+
+
+# Call the function to inject CSS
+inject_background_css()
 
 # Load the movie data, TF-IDF vectorizer, and KNN model from pickle files
 movies = pickle.load(open("movies_list.pkl", "rb"))
@@ -27,7 +106,6 @@ movies_list = movies["movieTitle"].values
 API_KEY = "14ba68fd10b28f2b824269c4a5c78960"
 
 
-# Fetch movie details using movie ID from TMDb API
 def fetch_movie_details(movie_id):
     url = f"https://api.themoviedb.org/3/movie/{movie_id}?api_key={API_KEY}&append_to_response=credits"
     response = requests.get(url)
@@ -47,7 +125,13 @@ def fetch_movie_details(movie_id):
         actors = [actor["name"] for actor in data["credits"]["cast"]]
         actor_names = actors[:5]
 
+    # Fetch homepage or IMDb link
     movie_link = data.get("homepage")
+    if not movie_link and "imdb_id" in data:
+        imdb_id = data["imdb_id"]
+        movie_link = f"https://www.imdb.com/title/{imdb_id}/"
+    elif not movie_link:
+        movie_link = "No official link available."
 
     return director_name, actor_names, movie_link
 
@@ -119,52 +203,61 @@ def recommend(movie, n_recommendations=10):
     )
 
 
+# Check if random movies have already been selected and stored in session state
+if "random_movies" not in st.session_state:
+    st.session_state["random_movies"] = random.sample(
+        list(zip(movies_list, movies["titleId"].values)), 7
+    )
+
+# Display random movies above the title
+row = st.columns(7)
+for idx, (movie, movie_id) in enumerate(st.session_state["random_movies"]):
+    poster_url, _ = fetch_poster(movie_id)  # Fetch the poster for each movie
+    if poster_url:
+        with row[idx]:
+            st.markdown(
+                f"""
+                <div style="display: flex; justify-content: center; height: 300px; margin-top: -50px; margin-left: -50px; margin-right: -50px;">
+                    <img src="{poster_url}" style="width: auto; height: auto;" alt="{movie}" />
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+    else:
+        with row[idx]:  # If no poster is available, show a placeholder message
+            st.markdown(
+                """
+                <div style="display: flex; justify-content: center;">
+                    <p style="color: red;">Poster not available</p>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+
+# Custom CSS for centering the selectbox
 st.markdown(
-    '<h1 style="text-align: center;">Movie Recommendation System</h1>',
+    """
+    <style>
+    div[data-baseweb="select"] {
+        margin-left: auto;
+        margin-right: auto;
+        display: block;
+        width: 1000px;  /* Adjust the width as needed */
+    }
+    </style>
+    """,
     unsafe_allow_html=True,
 )
 
-selectValue = st.selectbox("Select your movie", movies_list)
-
-# Default movie recommendations
-num_default_rows = 1
-num_default_cols = 20
-
-st.markdown(
-    '<h5 style="text-align: center;">YOUR MOVIES</h5>',
-    unsafe_allow_html=True,
+selectValue = st.selectbox(
+    "",
+    options=["Select your movie for recommendation"] + list(movies_list),
+    key="movie_selectbox",
 )
 
-# start_idx = 2  # Start from the third movie
-# num_default_rows = 1
-# num_default_cols = 5
-
-# for i in range(num_default_rows):
-#     row = st.columns(num_default_cols)
-#     for j in range(num_default_cols):
-#         idx = start_idx + (i * num_default_cols + j)
-#         if idx < len(movies_list):
-#             movie_id = movies.loc[idx, "titleId"]
-#             poster_url, movie_details = fetch_poster(movie_id)
-#             if poster_url and movie_details:
-#                 with row[j]:
-#                     st.markdown(
-#                         f"""
-#                         <div style="background-color: DarkGoldenRod ; width: 220px; height: 310px; margin-left: 20px; margin-right: 20px; margin-bottom: 20px; display: flex; justify-content: center; align-items: center;">
-#                              {'<img src="' + poster_url + '" style="width: 210px; height: 300px;" />' if poster_url else '<p>No poster available</p>'}
-#                         </div>
-#                         """,
-#                         unsafe_allow_html=True,
-#                     )
-
-# st.markdown(
-#     """
-#       <hr>
-#     """,
-#     unsafe_allow_html=True,
-# )
-
-if st.button("Search for Recommendation"):
+# If a movie is selected, trigger the recommendation system
+if selectValue and selectValue != "Select your movie for recommendation":
     (
         recommended_movies,
         recommended_posters,
@@ -175,8 +268,9 @@ if st.button("Search for Recommendation"):
         recommended_links,
     ) = recommend(selectValue)
 
+    # Display recommended movies
     num_rows = 10
-    num_cols = 1
+    num_cols = 2
     for i in range(num_rows):
         row = st.columns(num_cols)
         for j in range(num_cols):
@@ -185,23 +279,49 @@ if st.button("Search for Recommendation"):
                 with row[j]:
                     st.markdown(
                         f"""
-                        <div style="background-color: tomato; border-radius: 1%; width: 100%; height: 340px; display: flex; align-items: center; margin-bottom: 10px;">
-                            <div style="flex: 0 0 100px;">
-                                {'<img src="' + recommended_posters[idx] + '" style="width: 200px; height: 300px; padding-left: 10px" />' if recommended_posters[idx] else '<p>No poster available</p>'}
+                        <div style="background-color: rgba(255, 99, 71, 0.1); border-radius: 1%; height: 300px; display: flex; align-items: center; margin-bottom: 10px; margin-left: 100px; margin-right: 100px;">
+                            <div style="flex: 0 0 200px;">
+                                <img src="{recommended_posters[idx]}" style="width: 200px; height: auto;" />
                             </div>
-                            <div style="flex: 1; padding-left: 20px; padding-right: 20px">
+                            <div style="flex: 1; padding-top: 10px; padding-left: 10px; padding-right: 10px; display: flex; flex-direction: column; margin-bottom: auto;">
                                 <div>
-                                    <p style="margin: 0;"><strong style="color: white;">Title: </strong> {recommended_movies[idx]}</p>
-                                    <p style="margin: 0;"><strong style="color: white;">Genres: </strong> {recommended_genres[idx]}</p>
-                                    <p style="margin: 0;"><strong style="color: white;">Overview: </strong> {recommended_overviews[idx]}</p>
-                                    <p style="margin: 0;"><strong style="color: white;">Director: </strong> {recommended_directors[idx]}</p>
-                                    <p style="margin: 0;"><strong style="color: white;">Actors: </strong> {recommended_actors[idx]}</p>
+                                    <p style="margin: 0;"><strong style="color: green;">Title: </strong> {recommended_movies[idx]}</p>
+                                    <p style="margin: 0;"><strong style="color: green;">Genres: </strong> {recommended_genres[idx]}</p>
+                                    <p style="margin: 0;"><strong style="color: green;">Director: </strong> {recommended_directors[idx]}</p>
+                                    <p style="margin: 0;"><strong style="color: green;">Actors: </strong> {recommended_actors[idx]}</p>
                                 </div>
-                                <div style="margin-top: 15px;">
-                                    <a type="button" href="{recommended_links[idx]}" style="background-color: green; color: white; padding: 10px 15px; text-decoration: none; border-radius: 50%; box-shadow: 1px 1px;"> Details </a>
+                                <div style="margin-top: 20px;">
+                                    <a type="button" href="{recommended_links[idx]}" style="background-color: green; color: white; padding: 10px 15px; text-decoration: none; border-radius: 20px; box-shadow: 1px 1px;"> Details </a>
                                 </div>
                             </div>
                         </div>
                         """,
                         unsafe_allow_html=True,
                     )
+else:
+    pass
+
+# Add a footer using HTML and CSS
+footer = """
+    <style>
+    .footer {
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        background-color: rgba(251, 218, 97, 0.5); /* Adjust transparency here */
+        background-image: linear-gradient(45deg, rgba(251, 218, 97, 0.5) 10%, rgba(255, 90, 205, 0.5) 70%);
+        color: white;
+        text-align: center;
+        padding: 20px;
+        font-size: 20px;
+        z-index: 100;
+    }
+    </style>
+    <div class="footer">
+        <p>Powered by Streamlit | © 2024 KUN RATHA KEAN</p>
+    </div>
+"""
+
+# Display the footer
+st.markdown(footer, unsafe_allow_html=True)
