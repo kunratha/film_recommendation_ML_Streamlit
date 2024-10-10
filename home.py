@@ -285,10 +285,18 @@ if selectValue and selectValue != "Select your movie for recommendation":
                             </div>
                             <div style="flex: 1; padding-top: 10px; padding-left: 10px; padding-right: 10px; display: flex; flex-direction: column; margin-bottom: auto;">
                                 <div>
-                                    <p style="margin: 0; color: white;"><strong style="color: green;">Title: </strong> {recommended_movies[idx]}</p>
-                                    <p style="margin: 0; color: white;"><strong style="color: green;">Genres: </strong> {recommended_genres[idx]}</p>
-                                    <p style="margin: 0; color: white;"><strong style="color: green;">Director: </strong> {recommended_directors[idx]}</p>
-                                    <p style="margin: 0; color: white;"><strong style="color: green;">Actors: </strong> {recommended_actors[idx]}</p>
+                                    <p style="margin: 0; color: white;">
+                                        <strong style="color: green;">Title: </strong> {recommended_movies[idx]}
+                                    </p>
+                                        <p style="margin: 0; color: white;">
+                                    <strong style="color: green;">Genres: </strong> {recommended_genres[idx]}
+                                    </p>
+                                    <p style="margin: 0; color: white;">
+                                        <strong style="color: green;">Director: </strong> {recommended_directors[idx]}
+                                    </p>
+                                    <p style="margin: 0; color: white;">
+                                        <strong style="color: green;">Actors: </strong> {recommended_actors[idx]}
+                                    </p>
                                 </div>
                                 <div style="margin-top: 20px;">
                                     <a type="button" href="{recommended_links[idx]}" style="background-color: green; color: white; padding: 10px 15px; text-decoration: none; border-radius: 20px; box-shadow: 1px 1px;"> Details </a>
