@@ -52,32 +52,32 @@ Go to TMDb and create an account.
 variable in the home.py file.
 
 # Requirements
-- ** Python 3.7+
-- ** Streamlit
-- ** Scikit-learn
-- ** Requests (for fetching data from TMDb API)
-- ** Pickle (for loading pre-trained models)
+- **Python 3.7+
+- **Streamlit
+- **Scikit-learn
+- **Requests (for fetching data from TMDb API)
+- **Pickle (for loading pre-trained models)
 
 
 # How It Works
-- ** The TF-IDF Vectorizer converts movie metadata (tags) into numerical format.
-- ** The KNN model finds similar movies based on the vectorized data.
-- ** The app interacts with TMDb API to fetch movie posters, cast, and director details.
-- ** A set of movie posters is displayed at the top of the page upon loading.
+- **The TF-IDF Vectorizer converts movie metadata (tags) into numerical format.
+- **The KNN model finds similar movies based on the vectorized data.
+- **The app interacts with TMDb API to fetch movie posters, cast, and director details.
+- **A set of movie posters is displayed at the top of the page upon loading.
 
 # API Integration
 This project uses The Movie Database (TMDb) API to fetch movie posters, cast, and additional movie information. The API provides detailed movie information such as:
 
-- ** Poster Images
-- ** Movie Overview
-- ** Director
-- ** Actors
-- ** IMDb Links
+- **Poster Images
+- **Movie Overview
+- **Director
+- **Actors
+- **IMDb Links
 
 # License
 This project is licensed under the MIT License.
 
-**Feel free to copy and paste this text into your `README.md` file. 
-It provides an overview of your project, features, installation steps, and instructions for using the app!**
+*Feel free to copy and paste this text into your `README.md` file. 
+It provides an overview of your project, features, installation steps, and instructions for using the app!*
 
     Users can s instructions for using the app!elect a movie, and the app will return a list of similar movies, displayed along with their posters and metadata.
