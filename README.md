@@ -80,4 +80,4 @@ This project is licensed under the MIT License.
 *Feel free to copy and paste this text into your `README.md` file. 
 It provides an overview of your project, features, installation steps, and instructions for using the app!*
 
-    Users can s instructions for using the app!elect a movie, and the app will return a list of similar movies, displayed along with their posters and metadata.
+Users can use instructions for using the app! select a movie, and the app will return a list of similar movies, displayed along with their posters and metadata.
